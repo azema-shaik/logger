@@ -79,7 +79,7 @@ func (l *Logger) log(message string, level int) {
 	}
 	logRecord := createRecord(message, level)
 	for _, hdlr := range l.Handlers {
-		hdlr.Emit(logRecord)
+		hdlr.emit(logRecord)
 	}
 }
 

@@ -1,8 +1,11 @@
 package main
 
 type Handler interface {
-	Emit(logRecord) (int, error)
+	SetLogLevel(int)
+	GetLogLevel() int
+	emit(logRecord) (int, error)
 	format(logRecord) string
+	GetFilters() []Filter
 }
 
 type Formatter interface {
