@@ -6,6 +6,7 @@ type Handler interface {
 	emit(logRecord) (int, error)
 	format(logRecord) string
 	GetFilters() []Filter
+	Close()
 }
 
 type Formatter interface {

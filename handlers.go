@@ -76,6 +76,10 @@ func (s *StreamHandler) format(l logRecord) string {
 
 }
 
+func (s *StreamHandler) Close() {
+	s.writer.Close()
+}
+
 //File Handler
 
 type FileHandler struct {
@@ -124,4 +128,8 @@ func (f *FileHandler) format(l logRecord) string {
 		f.formatter = &StdFormatter{}
 	}
 	return f.formatter.Format(l)
+}
+
+func (f *FileHandler) Close() {
+	f.writer.Close()
 }
