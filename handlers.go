@@ -27,6 +27,12 @@ func filter(handler Handler, record logRecord) bool {
 	}
 }
 
+func setDefaultFormatter(handler Handler) {
+	if handler.GetFormatter() == nil {
+		handler.SetFormatter(&StdFormatter{})
+	}
+}
+
 // StreamHandler
 
 type StreamHandler struct {
@@ -36,8 +42,8 @@ type StreamHandler struct {
 	filters   []Filter
 }
 
-func GetStreamHandler() StreamHandler {
-	return StreamHandler{writer: os.Stdout}
+func GetStreamHandler() *StreamHandler {
+	return &StreamHandler{writer: os.Stdout}
 }
 
 func (s *StreamHandler) SetLogLevel(level int) {
@@ -51,6 +57,11 @@ func (s *StreamHandler) GetLogLevel() int {
 func (s *StreamHandler) SetFormatter(formatter Formatter) {
 	s.formatter = formatter
 }
+
+func (s *StreamHandler) GetFormatter() Formatter {
+	return s.formatter
+}
+
 func (s *StreamHandler) AddFilter(filter Filter) {
 	s.filters = append(s.filters, filter)
 }
@@ -60,18 +71,16 @@ func (s *StreamHandler) GetFilters() []Filter {
 }
 
 func (s *StreamHandler) emit(record logRecord) (int, error) {
-	if !filter(s, record) {
+	if len(s.filters) != 0 && !filter(s, record) {
 		return 0, nil
 
 	}
+	setDefaultFormatter(s)
 	message := s.formatter.Format(record)
 	return s.writer.WriteString(message)
 }
 
 func (s *StreamHandler) format(l logRecord) string {
-	if s.formatter == nil {
-		s.formatter = &StdFormatter{}
-	}
 	return s.formatter.Format(l)
 
 }
@@ -89,9 +98,9 @@ type FileHandler struct {
 	filters   []Filter
 }
 
-func GetFileHandler(filename string, flag int, perm os.FileMode) FileHandler {
+func GetFileHandler(filename string, flag int, perm os.FileMode) *FileHandler {
 	file, _ := os.OpenFile(filename, flag, perm)
-	return FileHandler{writer: file}
+	return &FileHandler{writer: file}
 }
 
 func (f *FileHandler) SetLogLevel(level int) {
@@ -104,6 +113,10 @@ func (f *FileHandler) GetLogLevel() int {
 
 func (f *FileHandler) SetFormatter(formatter Formatter) {
 	f.formatter = formatter
+}
+
+func (f *FileHandler) GetFormatter() Formatter {
+	return f.formatter
 }
 
 func (f *FileHandler) AddFilter(filter Filter) {
@@ -119,14 +132,12 @@ func (f *FileHandler) emit(record logRecord) (int, error) {
 		return 0, nil
 
 	}
+	setDefaultFormatter(f)
 	message := f.formatter.Format(record)
 	return f.writer.WriteString(message)
 }
 
 func (f *FileHandler) format(l logRecord) string {
-	if f.formatter == nil {
-		f.formatter = &StdFormatter{}
-	}
 	return f.formatter.Format(l)
 }
 

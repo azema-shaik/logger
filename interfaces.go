@@ -6,6 +6,8 @@ type Handler interface {
 	emit(logRecord) (int, error)
 	format(logRecord) string
 	GetFilters() []Filter
+	SetFormatter(Formatter)
+	GetFormatter() Formatter
 	Close()
 }
 

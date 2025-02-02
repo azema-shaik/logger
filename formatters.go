@@ -21,6 +21,13 @@ func (f *StdFormatter) Format(l logRecord) string {
 		datefmt = f.datefmt
 
 	}
+	var fmtString string
+	switch fmtString {
+	case "":
+		fmtString = "[%(asctime)s] : [%(levelname)s] : [%(funcName)s] : [%(msg)s]"
+	default:
+		fmtString = f.formatString
+	}
 	logTime := l.Datetime.Format(datefmt)
 	record := map[string]string{
 		"%(asctime)s":   logTime,
@@ -30,13 +37,12 @@ func (f *StdFormatter) Format(l logRecord) string {
 		"%(lineno)d":    fmt.Sprintf("%d", l.LineNo),
 		"%(name)s":      l.Name,
 		"%(filename)s":  l.File,
+		"%(msg)s":       l.Message,
 	}
-
-	var formatString string
 
 	for placeholder, replacement := range record {
-		formatString = strings.Replace(f.formatString, placeholder, replacement, 1)
+		fmtString = strings.Replace(fmtString, placeholder, replacement, 1)
 	}
 
-	return formatString
+	return fmtString + "\n"
 }

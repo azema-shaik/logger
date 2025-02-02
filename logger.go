@@ -40,10 +40,11 @@ func levelName(level int) (levelname string) {
 	}
 	return levelname
 }
-func createRecord(message string, level int) logRecord {
-	pc, file, lineNo, _ := runtime.Caller(1)
+func createRecord(name string, message string, level int) logRecord {
+	pc, file, lineNo, _ := runtime.Caller(3)
 	funcName := runtime.FuncForPC(pc).Name()
 	return logRecord{
+		Name:      name,
 		Datetime:  time.Now(),
 		File:      file,
 		LineNo:    lineNo,
@@ -76,8 +77,9 @@ func (l *Logger) AddHandlers(handler Handler) {
 
 func (l *Logger) log(message string, level int) {
 	if level < l.Level {
+		return
 	}
-	logRecord := createRecord(message, level)
+	logRecord := createRecord(l.Name, message, level)
 	for _, hdlr := range l.Handlers {
 		hdlr.emit(logRecord)
 	}
