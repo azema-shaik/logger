@@ -1,4 +1,4 @@
-package main
+package logger
 
 type Handler interface {
 	SetLogLevel(int)
