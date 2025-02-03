@@ -99,3 +99,9 @@ func (l *Logger) Warning(message string) {
 func (l *Logger) Critical(message string) {
 	l.log(message, CRITICAL)
 }
+
+func (l *Logger) Close() {
+	for _, hdlr := range l.Handlers {
+		hdlr.Close()
+	}
+}
