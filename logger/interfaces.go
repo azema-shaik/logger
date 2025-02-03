@@ -2,11 +2,8 @@ package logger
 
 type Handler interface {
 	SetLogLevel(int)
-	GetLogLevel() int
 	emit(LogRecord) (int, error)
-	format(LogRecord) string
 	SetFormatter(Formatter)
-	GetFormatter() Formatter
 	Close()
 }
 

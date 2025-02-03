@@ -37,7 +37,7 @@ func FormatLogRecord(l LogRecord, f Formatter) string {
 		fmtString = strings.Replace(fmtString, placeholder, replacement, 1)
 	}
 
-	return fmtString + "\n"
+	return fmtString
 
 }
 
