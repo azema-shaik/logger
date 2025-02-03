@@ -5,7 +5,6 @@ type Handler interface {
 	GetLogLevel() int
 	emit(LogRecord) (int, error)
 	format(LogRecord) string
-	GetFilters() []Filter
 	SetFormatter(Formatter)
 	GetFormatter() Formatter
 	Close()
