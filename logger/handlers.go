@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func filter(handler Handler, record logRecord) bool {
+func filter(handler Handler, record LogRecord) bool {
 
 	if record.LevelNo < (handler).GetLogLevel() {
 		return false
@@ -70,7 +70,7 @@ func (s *StreamHandler) GetFilters() []Filter {
 	return (s).filters
 }
 
-func (s *StreamHandler) emit(record logRecord) (int, error) {
+func (s *StreamHandler) emit(record LogRecord) (int, error) {
 	if len(s.filters) != 0 && !filter(s, record) {
 		return 0, nil
 
@@ -80,7 +80,7 @@ func (s *StreamHandler) emit(record logRecord) (int, error) {
 	return s.writer.WriteString(message)
 }
 
-func (s *StreamHandler) format(l logRecord) string {
+func (s *StreamHandler) format(l LogRecord) string {
 	return s.formatter.Format(l)
 
 }
@@ -127,7 +127,7 @@ func (f *FileHandler) GetFilters() []Filter {
 	return f.filters
 }
 
-func (f *FileHandler) emit(record logRecord) (int, error) {
+func (f *FileHandler) emit(record LogRecord) (int, error) {
 	if !filter(f, record) {
 		return 0, nil
 
@@ -137,7 +137,7 @@ func (f *FileHandler) emit(record logRecord) (int, error) {
 	return f.writer.WriteString(message)
 }
 
-func (f *FileHandler) format(l logRecord) string {
+func (f *FileHandler) format(l LogRecord) string {
 	return f.formatter.Format(l)
 }
 

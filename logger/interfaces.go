@@ -3,8 +3,8 @@ package logger
 type Handler interface {
 	SetLogLevel(int)
 	GetLogLevel() int
-	emit(logRecord) (int, error)
-	format(logRecord) string
+	emit(LogRecord) (int, error)
+	format(LogRecord) string
 	GetFilters() []Filter
 	SetFormatter(Formatter)
 	GetFormatter() Formatter
@@ -12,9 +12,11 @@ type Handler interface {
 }
 
 type Formatter interface {
-	Format(logRecord) string
+	SetFormatter(formatString string, datefmt string)
+	GetFormatter() (string, string)
+	Format(LogRecord) string
 }
 
 type Filter interface {
-	Filter(logRecord) bool
+	Filter(LogRecord) bool
 }

@@ -14,7 +14,7 @@ const (
 	CRITICAL
 )
 
-type logRecord struct {
+type LogRecord struct {
 	Name      string
 	Datetime  time.Time
 	File      string
@@ -40,10 +40,10 @@ func levelName(level int) (levelname string) {
 	}
 	return levelname
 }
-func createRecord(name string, message string, level int) logRecord {
+func createRecord(name string, message string, level int) LogRecord {
 	pc, file, lineNo, _ := runtime.Caller(3)
 	funcName := runtime.FuncForPC(pc).Name()
-	return logRecord{
+	return LogRecord{
 		Name:      name,
 		Datetime:  time.Now(),
 		File:      file,
