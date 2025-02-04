@@ -57,11 +57,17 @@ func createRecord(name string, message string, level int) LogRecord {
 
 type Logger struct {
 	Name     string
+	manager  *Manager
 	Level    int
 	Handlers []Handler
+	parent   *Logger
 }
 
 func GetLogger(name string) *Logger {
+	root = &rootLogger{
+		logger{Name: "root"},
+	}
+
 	return &Logger{
 		Name: name,
 	}

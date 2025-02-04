@@ -16,3 +16,5 @@ type Formatter interface {
 type Filter interface {
 	Filter(LogRecord) bool
 }
+
+type LoggerLike interface{}
