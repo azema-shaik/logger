@@ -51,8 +51,8 @@ func (m *Manager) fixUpParents(logger *Logger) {
 		if m.loggerDict[substr] == nil {
 			m.loggerDict[substr] = &placeholder{}
 		} else {
-			var _parent LoggerLike
-			_parent = m.loggerDict[substr]
+
+			_parent := m.loggerDict[substr]
 			switch t := _parent.(type) {
 			case *Logger:
 				parent = t

@@ -15,6 +15,10 @@ func (b *BaseHandler) SetLogLevel(level int) {
 	b.logLevel = level
 }
 
+func (b *BaseHandler) GetLogLevel() int {
+	return b.logLevel
+}
+
 func (b *BaseHandler) SetFormatter(formatter Formatter) {
 	b.formatter = formatter
 }
@@ -45,19 +49,19 @@ func (b *BaseHandler) filter(record LogRecord) bool {
 
 	if record.LevelNo < b.logLevel {
 		return false
-	} else if len(b.GetFilters()) == 0 {
+	} else if len(b.filters) == 0 {
 		return true
 	}
 
 	var isValidRecord int
-	for _, filter := range b.GetFilters() {
+	for _, filter := range b.filters {
 		if filter.Filter(record) {
 			isValidRecord += 1
 		}
 	}
 
 	switch isValidRecord {
-	case len(b.GetFilters()):
+	case len(b.filters):
 		return true
 	default:
 		return false
@@ -97,6 +101,10 @@ func (s *StreamHandler) SetLogLevel(level int) {
 	s.bh.SetLogLevel(level)
 }
 
+func (s *StreamHandler) GetLogLevel() int {
+	return s.bh.logLevel
+}
+
 func (s *StreamHandler) Close() {
 	s.bh.Close()
 }
@@ -115,6 +123,10 @@ func GetFileHandler(filename string, flag int, perm os.FileMode) *FileHandler {
 
 func (f *FileHandler) SetLogLevel(level int) {
 	f.bh.SetLogLevel(level)
+}
+
+func (f *FileHandler) GetLogLevel() int {
+	return f.bh.logLevel
 }
 
 func (f *FileHandler) SetFormatter(formatter Formatter) {

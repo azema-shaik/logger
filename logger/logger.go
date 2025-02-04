@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"runtime"
 	"time"
 )
@@ -56,20 +57,25 @@ func createRecord(name string, message string, level int) LogRecord {
 }
 
 type Logger struct {
-	Name     string
-	manager  *Manager
-	Level    int
-	Handlers []Handler
-	parent   *Logger
+	Propagate bool
+	Name      string
+	manager   *Manager
+	Level     int
+	handlers  []Handler
+	parent    *Logger
 }
 
 func GetLogger(name string) *Logger {
-	root = &rootLogger{
-		logger{Name: "root"},
+	root = &Logger{
+		Name: "root",
 	}
 
-	return &Logger{
-		Name: name,
+	root.manager = &Manager{rootLogger: root}
+
+	if name == "" && name == "root" {
+		return root
+	} else {
+		return root.manager.GetLogger(name)
 	}
 }
 
@@ -78,7 +84,7 @@ func (l *Logger) SetLevel(level int) {
 }
 
 func (l *Logger) AddHandlers(handler Handler) {
-	l.Handlers = append(l.Handlers, handler)
+	l.handlers = append(l.handlers, handler)
 }
 
 func (l *Logger) log(message string, level int) {
@@ -86,9 +92,35 @@ func (l *Logger) log(message string, level int) {
 		return
 	}
 	logRecord := createRecord(l.Name, message, level)
-	for _, hdlr := range l.Handlers {
-		hdlr.emit(logRecord)
+	l.callHandlers(logRecord)
+}
+
+func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
+	logger := l
+	found := 0
+
+	for logger != nil {
+		for _, hdlr := range logger.handlers {
+			found += 1
+			if nBytes, err := hdlr.emit(record); err != nil {
+				return nBytes, err
+			}
+
+			if !logger.Propagate {
+				logger = nil
+			} else {
+				logger = logger.parent
+			}
+		}
 	}
+
+	if found == 0 {
+		return nBytes, fmt.Errorf("%s has no handlers", l.Name)
+
+	}
+
+	return nBytes, err
+
 }
 
 func (l *Logger) Debug(message string) {
@@ -107,7 +139,7 @@ func (l *Logger) Critical(message string) {
 }
 
 func (l *Logger) Close() {
-	for _, hdlr := range l.Handlers {
+	for _, hdlr := range l.handlers {
 		hdlr.Close()
 	}
 }
