@@ -18,4 +18,5 @@ type Filter interface {
 	Filter(LogRecord) bool
 }
 
-type LoggerLike interface{}
+type LoggerLike interface {
+}

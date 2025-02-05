@@ -80,6 +80,14 @@ func GetLogger(name string) *Logger {
 	}
 }
 
+func (l *Logger) GetParent() *Logger {
+	return l.parent
+}
+
+func (l *Logger) GetManager() *Manager {
+	return l.manager
+}
+
 func (l *Logger) SetLevel(level int) {
 	l.Level = level
 }
@@ -144,4 +152,8 @@ func (l *Logger) Close() {
 	for _, hdlr := range l.handlers {
 		hdlr.Close()
 	}
+}
+
+func (l *Logger) GetLoggerDict() {
+	fmt.Println("--------------")
 }

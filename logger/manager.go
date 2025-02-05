@@ -8,13 +8,33 @@ type placeholder struct {
 	loggerMap []*Logger
 }
 
+func getPlaceHolder(logger *Logger) *placeholder {
+	return &placeholder{
+		loggerMap: []*Logger{logger},
+	}
+
+}
+
 func (p *placeholder) append(logger *Logger) {
-	p.loggerMap = append(p.loggerMap, logger)
+	var found bool
+	for _, alogger := range p.loggerMap {
+		if alogger == logger {
+			found = true
+		}
+	}
+	if !found {
+		p.loggerMap = append(p.loggerMap, logger)
+	}
+
 }
 
 type Manager struct {
 	rootLogger *Logger
 	loggerDict map[string]LoggerLike
+}
+
+func (m *Manager) GetLoggerDict() map[string]LoggerLike {
+	return m.loggerDict
 }
 
 func (m *Manager) GetLogger(name string) *Logger {
@@ -54,9 +74,8 @@ func (m *Manager) fixUpParents(logger *Logger) {
 	for findLastDot > 0 && parent == nil {
 		substr := name[:findLastDot]
 		if m.loggerDict[substr] == nil {
-			m.loggerDict[substr] = &placeholder{}
+			m.loggerDict[substr] = getPlaceHolder(logger)
 		} else {
-
 			_parent := m.loggerDict[substr]
 			switch t := _parent.(type) {
 			case *Logger:
@@ -65,7 +84,6 @@ func (m *Manager) fixUpParents(logger *Logger) {
 				t.append(logger)
 			}
 		}
-
 		findLastDot = strings.LastIndex(name[:findLastDot], ".")
 
 	}
@@ -82,33 +100,9 @@ func (m *Manager) fixUpParents(logger *Logger) {
 func (m *Manager) fixUpChildren(ph *placeholder, logger *Logger) {
 	name := logger.Name
 	for _, _logger := range ph.loggerMap {
-		if _logger.parent.Name[:len(name)] != name {
+		if strings.HasPrefix(_logger.parent.Name, name) {
 			_logger.parent.Name = name
 		}
 	}
 
 }
-
-// func (m *Manager) fixUpChildren(logger *Logger) {
-// 	name := logger.Name
-// 	findDot := strings.LastIndex(name, ".")
-
-// 	var rv *Logger
-// 	for (findDot > 0) && (rv == nil) {
-// 		substr := name[:findDot]
-// 		// this condition checks is the parent with given exists
-// 		// if it doesnot exist an empty logger is initialized
-// 		if m.loggerDict[name] == nil {
-// 			var emptyLogger *Logger
-// 			m.loggerDict[substr] = emptyLogger
-// 		} else {
-// 			parent := m.loggerDict[substr]
-// 			if parent != nil {
-// 				rv = parent
-// 			} else {
-
-// 			}
-// 		}
-
-// 	}
-// }
