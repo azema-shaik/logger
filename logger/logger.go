@@ -66,11 +66,12 @@ type Logger struct {
 }
 
 func GetLogger(name string) *Logger {
-	root = &Logger{
-		Name: "root",
+	if root == nil {
+		root = &Logger{
+			Name: "root",
+		}
+		root.manager = &Manager{rootLogger: root}
 	}
-
-	root.manager = &Manager{rootLogger: root}
 
 	if name == "" && name == "root" {
 		return root
@@ -83,34 +84,35 @@ func (l *Logger) SetLevel(level int) {
 	l.Level = level
 }
 
-func (l *Logger) AddHandlers(handler Handler) {
+func (l *Logger) AddHandler(handler Handler) {
 	l.handlers = append(l.handlers, handler)
 }
 
-func (l *Logger) log(message string, level int) {
+func (l *Logger) log(message string, level int) (int, error) {
 	if level < l.Level {
-		return
+		return 0, nil
 	}
 	logRecord := createRecord(l.Name, message, level)
-	l.callHandlers(logRecord)
+	return l.callHandlers(logRecord)
 }
 
 func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
+
 	logger := l
 	found := 0
-
 	for logger != nil {
 		for _, hdlr := range logger.handlers {
 			found += 1
 			if nBytes, err := hdlr.emit(record); err != nil {
 				return nBytes, err
 			}
+		}
 
-			if !logger.Propagate {
-				logger = nil
-			} else {
-				logger = logger.parent
-			}
+		if !logger.Propagate {
+			logger = nil
+		} else {
+			logger = logger.parent
+
 		}
 	}
 
@@ -123,19 +125,19 @@ func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
 
 }
 
-func (l *Logger) Debug(message string) {
-	l.log(message, DEBUG)
+func (l *Logger) Debug(message string) (int, error) {
+	return l.log(message, DEBUG)
 }
 
-func (l *Logger) Info(message string) {
-	l.log(message, INFO)
+func (l *Logger) Info(message string) (int, error) {
+	return l.log(message, INFO)
 }
 
-func (l *Logger) Warning(message string) {
-	l.log(message, WARNING)
+func (l *Logger) Warning(message string) (int, error) {
+	return l.log(message, WARNING)
 }
-func (l *Logger) Critical(message string) {
-	l.log(message, CRITICAL)
+func (l *Logger) Critical(message string) (int, error) {
+	return l.log(message, CRITICAL)
 }
 
 func (l *Logger) Close() {

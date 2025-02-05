@@ -32,7 +32,7 @@ func (b *BaseHandler) GetFilters() []Filter {
 }
 
 func (b *BaseHandler) emit(record LogRecord) (int, error) {
-	if len(b.filters) != 0 && !b.filter(record) {
+	if record.LevelNo < b.logLevel || (len(b.filters) != 0 && !b.filter(record)) {
 		return 0, nil
 
 	}
@@ -46,13 +46,6 @@ func (b *BaseHandler) emit(record LogRecord) (int, error) {
 }
 
 func (b *BaseHandler) filter(record LogRecord) bool {
-
-	if record.LevelNo < b.logLevel {
-		return false
-	} else if len(b.filters) == 0 {
-		return true
-	}
-
 	var isValidRecord int
 	for _, filter := range b.filters {
 		if filter.Filter(record) {

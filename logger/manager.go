@@ -1,6 +1,8 @@
 package logger
 
-import "strings"
+import (
+	"strings"
+)
 
 type placeholder struct {
 	loggerMap []*Logger
@@ -18,6 +20,10 @@ type Manager struct {
 func (m *Manager) GetLogger(name string) *Logger {
 	//check if the logger with same name exisits
 	var logger *Logger
+	if m.loggerDict == nil {
+		m.loggerDict = make(map[string]LoggerLike)
+	}
+
 	if m.loggerDict[name] != nil {
 		// if the logger already exists return the logger
 		switch t := m.loggerDict[name].(type) {
@@ -25,20 +31,19 @@ func (m *Manager) GetLogger(name string) *Logger {
 			logger = t
 		case *placeholder: //check if an empty placholder exists
 			ph := t
-			logger = &Logger{Name: name}
+			logger = &Logger{Name: name, Propagate: true}
 			logger.manager = m
 			m.fixUpChildren(ph, logger) // reset its children parent attribyte to itself
 			m.fixUpParents(logger)
 
 		}
 	} else { //this name does not exist
-		logger = GetLogger(name)
+		logger = &Logger{Name: name, Propagate: true}
 		logger.manager = m
 		m.loggerDict[name] = logger
 		m.fixUpParents(logger)
 
 	}
-
 	return logger
 }
 
@@ -67,9 +72,11 @@ func (m *Manager) fixUpParents(logger *Logger) {
 
 	if parent == nil {
 		parent = m.rootLogger
+
 	}
 
 	logger.parent = parent
+
 }
 
 func (m *Manager) fixUpChildren(ph *placeholder, logger *Logger) {
