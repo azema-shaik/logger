@@ -20,6 +20,7 @@ func FormatLogRecord(l LogRecord, f Formatter) string {
 	case "":
 		datefmt = "2006-01-02 15:04:05 PM"
 	}
+	sFileName := strings.Split(l.File, "/")
 
 	logTime := l.Datetime.Format(datefmt)
 	record := map[string]string{
@@ -29,8 +30,9 @@ func FormatLogRecord(l LogRecord, f Formatter) string {
 		"%(levelno)d":   fmt.Sprintf("%d", l.LevelNo),
 		"%(lineno)d":    fmt.Sprintf("%d", l.LineNo),
 		"%(name)s":      l.Name,
-		"%(filename)s":  l.File,
+		"%(Lfilename)s": l.File,
 		"%(msg)s":       l.Message,
+		"%(Sfilename)s": sFileName[len(sFileName)-1],
 	}
 
 	for placeholder, replacement := range record {

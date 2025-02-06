@@ -8,6 +8,10 @@ type placeholder struct {
 	loggerMap []*Logger
 }
 
+func (p *placeholder) GetLoggerMap() []*Logger {
+	return p.loggerMap
+}
+
 func getPlaceHolder(logger *Logger) *placeholder {
 	return &placeholder{
 		loggerMap: []*Logger{logger},
@@ -51,14 +55,14 @@ func (m *Manager) GetLogger(name string) *Logger {
 			logger = t
 		case *placeholder: //check if an empty placholder exists
 			ph := t
-			logger = &Logger{Name: name, Propagate: true}
+			logger = &Logger{Name: name, Propagate: true, Level: WARNING}
 			logger.manager = m
 			m.fixUpChildren(ph, logger) // reset its children parent attribyte to itself
 			m.fixUpParents(logger)
 
 		}
 	} else { //this name does not exist
-		logger = &Logger{Name: name, Propagate: true}
+		logger = &Logger{Name: name, Propagate: true, Level: WARNING}
 		logger.manager = m
 		m.loggerDict[name] = logger
 		m.fixUpParents(logger)
@@ -100,7 +104,7 @@ func (m *Manager) fixUpParents(logger *Logger) {
 func (m *Manager) fixUpChildren(ph *placeholder, logger *Logger) {
 	name := logger.Name
 	for _, _logger := range ph.loggerMap {
-		if strings.HasPrefix(_logger.parent.Name, name) {
+		if !strings.HasPrefix(_logger.parent.Name, name) {
 			_logger.parent.Name = name
 		}
 	}

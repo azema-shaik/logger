@@ -65,15 +65,19 @@ type Logger struct {
 	parent    *Logger
 }
 
+func (l *Logger) String() string {
+	return fmt.Sprintf("<Logger(%#v, %s)>", l.Name, levelName(l.Level))
+}
+
 func GetLogger(name string) *Logger {
 	if root == nil {
 		root = &Logger{
-			Name: "root",
+			Name: "root", Level: WARNING,
 		}
 		root.manager = &Manager{rootLogger: root}
 	}
 
-	if name == "" && name == "root" {
+	if len(name) == 0 || name == "root" {
 		return root
 	} else {
 		return root.manager.GetLogger(name)
@@ -141,6 +145,10 @@ func (l *Logger) Info(message string) (int, error) {
 	return l.log(message, INFO)
 }
 
+func (l *Logger) Error(message string) (int, error) {
+	return l.log(message, INFO)
+}
+
 func (l *Logger) Warning(message string) (int, error) {
 	return l.log(message, WARNING)
 }
@@ -148,12 +156,14 @@ func (l *Logger) Critical(message string) (int, error) {
 	return l.log(message, CRITICAL)
 }
 
-func (l *Logger) Close() {
-	for _, hdlr := range l.handlers {
-		hdlr.Close()
+func Close() {
+	for _, logger := range root.manager.loggerDict {
+		value, ok := logger.(*Logger)
+		if !ok {
+			continue
+		}
+		for _, hdlr := range value.handlers {
+			hdlr.Close()
+		}
 	}
-}
-
-func (l *Logger) GetLoggerDict() {
-	fmt.Println("--------------")
 }
