@@ -133,3 +133,51 @@ func main() {
     logging.Close()
 }
 ```
+
+
+## Using with Goroutines
+
+To use the logging system with goroutines, you can create a logger and share it among multiple goroutines. Here is an example of how to do this:
+
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+    "sync"
+
+    logging "github.com/azema-shaik/logger/logger"
+)
+
+func main() {
+    logger := logging.GetLogger("example")
+    logger.SetLevel(logging.DEBUG)
+
+    // StreamHandler
+    streamHandler, _ := logging.GetStreamHandler()
+    streamHandler.SetLogLevel(logging.DEBUG)
+    logger.AddHandler(streamHandler)
+
+    // FileHandler
+    fileHandler, _ := logging.GetFileHandler("log.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+    fileHandler.SetLogLevel(logging.DEBUG)
+    logger.AddHandler(fileHandler)
+
+    var wg sync.WaitGroup
+    for i := 0; i < 5; i++ {
+        wg.Add(1)
+        go func(id int) {
+            defer wg.Done()
+            logger.Debug(fmt.Sprintf("Goroutine %d: This is a debug message", id))
+            logger.Info(fmt.Sprintf("Goroutine %d: This is an info message", id))
+            logger.Warning(fmt.Sprintf("Goroutine %d: This is a warning message", id))
+            logger.Error(fmt.Sprintf("Goroutine %d: This is an error message", id))
+            logger.Critical(fmt.Sprintf("Goroutine %d: This is a critical message", id))
+        }(i)
+    }
+
+    wg.Wait()
+    logging.Close()
+}
+```
