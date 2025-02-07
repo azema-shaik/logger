@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -110,7 +111,11 @@ type FileHandler struct {
 }
 
 func GetFileHandler(filename string, flag int, perm os.FileMode) *FileHandler {
-	file, _ := os.OpenFile(filename, flag, perm)
+	file, err := os.OpenFile(filename, flag, perm)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(1)
+	}
 	return &FileHandler{bh: &BaseHandler{writer: file}, filename: filename}
 }
 
