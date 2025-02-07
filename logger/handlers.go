@@ -1,12 +1,16 @@
 package logger
 
-import "os"
+import (
+	"os"
+	"sync"
+)
 
 type BaseHandler struct {
 	writer    *os.File
 	formatter Formatter
 	logLevel  int
 	filters   []Filter
+	mu        sync.RWMutex
 }
 
 func (b *BaseHandler) SetLogLevel(level int) {
@@ -22,6 +26,8 @@ func (b *BaseHandler) SetFormatter(formatter Formatter) {
 }
 
 func (b *BaseHandler) AddFilter(filter Filter) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.filters = append(b.filters, filter)
 }
 
@@ -30,6 +36,8 @@ func (b *BaseHandler) GetFilters() []Filter {
 }
 
 func (b *BaseHandler) emit(record LogRecord) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	if record.LevelNo < b.logLevel || (len(b.filters) != 0 && !b.filter(record)) {
 		return 0, nil
 
@@ -40,10 +48,21 @@ func (b *BaseHandler) emit(record LogRecord) (int, error) {
 	}
 
 	message := b.formatter.Format(record)
-	return b.writer.WriteString(message)
+	nBytes, err := b.writer.WriteString(message)
+	if err == nil {
+		if e := b.writer.Sync(); e != nil {
+			err = e
+			nBytes = 0
+		}
+	}
+
+	return nBytes, err
+
 }
 
 func (b *BaseHandler) filter(record LogRecord) bool {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	var isValidRecord int
 	for _, filter := range b.filters {
 		if filter.Filter(record) {
@@ -60,6 +79,8 @@ func (b *BaseHandler) filter(record LogRecord) bool {
 }
 
 func (b *BaseHandler) Close() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.writer.Close()
 }
 

@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 )
 
@@ -63,6 +64,7 @@ type Logger struct {
 	Level     int
 	handlers  []Handler
 	parent    *Logger
+	mu        sync.RWMutex
 }
 
 func (l *Logger) String() string {
@@ -97,6 +99,8 @@ func (l *Logger) SetLevel(level int) {
 }
 
 func (l *Logger) AddHandler(handler Handler) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.handlers = append(l.handlers, handler)
 }
 
@@ -109,6 +113,8 @@ func (l *Logger) log(message string, level int) (int, error) {
 }
 
 func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 
 	logger := l
 	found := 0

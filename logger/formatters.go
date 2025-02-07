@@ -5,7 +5,23 @@ import (
 	"strings"
 )
 
-func FormatLogRecord(l LogRecord, f Formatter) string {
+//these are placeholders only
+
+type StdFormatter struct {
+	FormatString string
+	DateFmt      string
+}
+
+func (f *StdFormatter) SetFormatter(formatString string, datefmt string) {
+	f.FormatString = formatString
+	f.DateFmt = datefmt
+}
+
+func (f *StdFormatter) GetFormatter() (string, string) {
+	return f.FormatString, f.DateFmt
+}
+
+func (f *StdFormatter) Format(l LogRecord) string {
 	formatString, datefmt := f.GetFormatter()
 
 	var fmtString string
@@ -41,25 +57,4 @@ func FormatLogRecord(l LogRecord, f Formatter) string {
 
 	return fmtString
 
-}
-
-//these are placeholders only
-
-type StdFormatter struct {
-	FormatString string
-	DateFmt      string
-}
-
-func (f *StdFormatter) SetFormatter(formatString string, datefmt string) {
-	f.FormatString = formatString
-	f.DateFmt = datefmt
-}
-
-func (f *StdFormatter) GetFormatter() (string, string) {
-	return f.FormatString, f.DateFmt
-}
-
-func (f *StdFormatter) Format(l LogRecord) string {
-	fmtString := FormatLogRecord(l, f)
-	return fmtString + "\n"
 }
