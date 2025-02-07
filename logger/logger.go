@@ -104,15 +104,15 @@ func (l *Logger) AddHandler(handler Handler) {
 	l.handlers = append(l.handlers, handler)
 }
 
-func (l *Logger) log(message string, level int) (int, error) {
+func (l *Logger) log(message string, level int) {
 	if level < l.Level {
-		return 0, nil
+		return
 	}
 	logRecord := createRecord(l.Name, message, level)
-	return l.callHandlers(logRecord)
+	l.callHandlers(logRecord)
 }
 
-func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
+func (l *Logger) callHandlers(record LogRecord) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
@@ -121,8 +121,8 @@ func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
 	for logger != nil {
 		for _, hdlr := range logger.handlers {
 			found += 1
-			if nBytes, err := hdlr.emit(record); err != nil {
-				return nBytes, err
+			if _, err := hdlr.emit(record); err != nil {
+				fmt.Printf("Error emitting log record: %v\n", err)
 			}
 		}
 
@@ -135,34 +135,34 @@ func (l *Logger) callHandlers(record LogRecord) (nBytes int, err error) {
 	}
 
 	if found == 0 {
-		return nBytes, fmt.Errorf("%s has no handlers", l.Name)
+		fmt.Printf("%s has no handlers", l.Name)
 
 	}
 
-	return nBytes, err
-
 }
 
-func (l *Logger) Debug(message string) (int, error) {
-	return l.log(message, DEBUG)
+func (l *Logger) Debug(message string) {
+	l.log(message, DEBUG)
 }
 
-func (l *Logger) Info(message string) (int, error) {
-	return l.log(message, INFO)
+func (l *Logger) Info(message string) {
+	l.log(message, INFO)
 }
 
-func (l *Logger) Error(message string) (int, error) {
-	return l.log(message, INFO)
+func (l *Logger) Error(message string) {
+	l.log(message, INFO)
 }
 
-func (l *Logger) Warning(message string) (int, error) {
-	return l.log(message, WARNING)
+func (l *Logger) Warning(message string) {
+	l.log(message, WARNING)
 }
-func (l *Logger) Critical(message string) (int, error) {
-	return l.log(message, CRITICAL)
+func (l *Logger) Critical(message string) {
+	l.log(message, CRITICAL)
 }
 
-func Close() {
+func (l *Logger) Close() {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	for _, logger := range root.manager.loggerDict {
 		value, ok := logger.(*Logger)
 		if !ok {
