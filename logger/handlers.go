@@ -1,9 +1,6 @@
 package logger
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
 type BaseHandler struct {
 	writer    *os.File
@@ -72,8 +69,8 @@ type StreamHandler struct {
 	bh *BaseHandler
 }
 
-func GetStreamHandler() *StreamHandler {
-	return &StreamHandler{bh: &BaseHandler{writer: os.Stdout}}
+func GetStreamHandler() (*StreamHandler, error) {
+	return &StreamHandler{bh: &BaseHandler{writer: os.Stdout}}, nil
 }
 
 func (s *StreamHandler) SetFormatter(formatter Formatter) {
@@ -110,13 +107,12 @@ type FileHandler struct {
 	filename string
 }
 
-func GetFileHandler(filename string, flag int, perm os.FileMode) *FileHandler {
+func GetFileHandler(filename string, flag int, perm os.FileMode) (*FileHandler, error) {
 	file, err := os.OpenFile(filename, flag, perm)
 	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
+		return nil, err
 	}
-	return &FileHandler{bh: &BaseHandler{writer: file}, filename: filename}
+	return &FileHandler{bh: &BaseHandler{writer: file}, filename: filename}, nil
 }
 
 func (f *FileHandler) SetLogLevel(level int) {
