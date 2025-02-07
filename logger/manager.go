@@ -2,6 +2,7 @@ package logger
 
 import (
 	"strings"
+	"sync"
 )
 
 type placeholder struct {
@@ -35,6 +36,7 @@ func (p *placeholder) append(logger *Logger) {
 type Manager struct {
 	rootLogger *Logger
 	loggerDict map[string]LoggerLike
+	mu         *sync.Mutex
 }
 
 func (m *Manager) GetLoggerDict() map[string]LoggerLike {
@@ -43,6 +45,8 @@ func (m *Manager) GetLoggerDict() map[string]LoggerLike {
 
 func (m *Manager) GetLogger(name string) *Logger {
 	//check if the logger with same name exisits
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var logger *Logger
 	if m.loggerDict == nil {
 		m.loggerDict = make(map[string]LoggerLike)
