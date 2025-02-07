@@ -10,12 +10,6 @@ A simple and flexible logging system for Go.
 - Filter support for log records
 - Logger hierarchy with propagation
 
-## Installation
-
-To install the logger package, run:
-
-```sh
-go get github.com/azema-shaik/logger
 
 ## Basic Usage
 
