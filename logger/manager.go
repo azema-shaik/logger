@@ -9,10 +9,6 @@ type placeholder struct {
 	loggerMap []*Logger
 }
 
-func (p *placeholder) GetLoggerMap() []*Logger {
-	return p.loggerMap
-}
-
 func getPlaceHolder(logger *Logger) *placeholder {
 	return &placeholder{
 		loggerMap: []*Logger{logger},
@@ -37,10 +33,6 @@ type Manager struct {
 	rootLogger *Logger
 	loggerDict map[string]LoggerLike
 	mu         *sync.Mutex
-}
-
-func (m *Manager) GetLoggerDict() map[string]LoggerLike {
-	return m.loggerDict
 }
 
 func (m *Manager) GetLogger(name string) *Logger {
