@@ -55,6 +55,6 @@ func (f *StdFormatter) Format(l LogRecord) string {
 		fmtString = strings.Replace(fmtString, placeholder, replacement, 1)
 	}
 
-	return fmtString
+	return fmtString + "\n"
 
 }
