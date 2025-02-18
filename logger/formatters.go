@@ -25,7 +25,7 @@ func (f *StdFormatter) Format(l LogRecord) string {
 	formatString, datefmt := f.GetFormatter()
 
 	var fmtString string
-	switch fmtString {
+	switch formatString {
 	case "":
 		fmtString = "[%(asctime)s] : [%(levelname)s] : [%(funcName)s] : [%(msg)s]"
 	default:
