@@ -50,9 +50,11 @@ func (b *BaseHandler) emit(record LogRecord) (int, error) {
 	message := b.formatter.Format(record)
 	nBytes, err := b.writer.WriteString(message)
 	if err == nil {
-		if e := b.writer.Sync(); e != nil {
-			err = e
-			nBytes = 0
+		if b.writer != os.Stdout && b.writer != os.Stderr {
+			if e := b.writer.Sync(); e != nil {
+				err = e
+				nBytes = 0
+			}
 		}
 	}
 
