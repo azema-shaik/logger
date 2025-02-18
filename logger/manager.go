@@ -32,7 +32,7 @@ func (p *placeholder) append(logger *Logger) {
 type Manager struct {
 	rootLogger *Logger
 	loggerDict map[string]LoggerLike
-	mu         *sync.Mutex
+	mu         sync.Mutex
 }
 
 func (m *Manager) GetLogger(name string) *Logger {
