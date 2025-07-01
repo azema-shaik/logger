@@ -150,7 +150,7 @@ func (l *Logger) Info(message string) {
 }
 
 func (l *Logger) Error(message string) {
-	l.log(message, INFO)
+	l.log(message, ERROR)
 }
 
 func (l *Logger) Warning(message string) {
